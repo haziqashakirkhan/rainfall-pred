@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetheria | Rainfall Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #e6e6fa;
+            --bg-secondary: #f3e8ff;
+            --accent-primary: #8a2be2;
+            --accent-hover: #7b2cbf;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f3ff 0%, #e6e6fa 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Abstract Background Shapes */
+        .bg-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+        
+        .shape-1 {
+            width: 400px; height: 400px;
+            background: rgba(167, 139, 250, 0.4);
+            top: -100px; left: -100px;
+        }
+        
+        .shape-2 {
+            width: 500px; height: 500px;
+            background: rgba(192, 132, 252, 0.3);
+            bottom: -200px; right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(10deg); }
+        }
+
+        header {
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #6d28d9, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .form-section {
+            flex: 2;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--accent-primary);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-group input {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(71, 85, 105, 0.4);
+        }
+
+        .btn-predict {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #c084fc 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -10px rgba(138, 43, 226, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -10px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            flex: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            min-height: 400px;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            transition: all 0.5s ease;
+        }
+
+        .result-icon.rain {
+            color: #60a5fa;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+            animation: pulse-blue 2s infinite;
+        }
+
+        .result-icon.sun {
+            color: #fbbf24;
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+            animation: pulse-yellow 2s infinite;
+        }
+
+        @keyframes pulse-blue {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse-yellow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-prob {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #6d28d9, #475569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+            .result-section {
+                position: relative;
+                top: 0;
+            }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #ef4444;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f3ff; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4b5fd; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa; 
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <header>
+        <h1>Aetheria Oracle</h1>
+        <p>Advanced Random Forest Rainfall Prediction Engine</p>
+    </header>
+
+    <div class="container">
+        <div class="form-section">
+            <form id="prediction-form">
+                
+                <h3 class="section-title"><i class="fas fa-cloud-sun"></i> Core Weather Metrics</h3>
+                <div class="grid-layout">
+                    <div class="input-group">
+                        <label for="temperature_c">Temperature (°C)</label>
+                        <input type="number" step="any" id="temperature_c" name="temperature_c" placeholder="e.g. 25.4" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="humidity_pct">Humidity (%)</label>
+                        <input type="number" step="any" id="humidity_pct" name="humidity_pct" placeholder="e.g. 78.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="pressure_hpa">Pressure (hPa)</label>
+                        <input type="number" step="any" id="pressure_hpa" name="pressure_hpa" placeholder="e.g. 1012.3" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="wind_speed_ms">Wind Speed (m/s)</label>
+                        <input type="number" step="any" id="wind_speed_ms" name="wind_speed_ms" placeholder="e.g. 5.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="cloud_cover_pct">Cloud Cover (%)</label>
+                        <input type="number" step="any" id="cloud_cover_pct" name="cloud_cover_pct" placeholder="e.g. 60.0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="solar_radiation">Solar Radiation</label>
+                        <input type="number" step="any" id="solar_radiation" name="solar_radiation" placeholder="e.g. 15.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="evaporation_mm">Evaporation (mm)</label>
+                        <input type="number" step="any" id="evaporation_mm" name="evaporation_mm" placeholder="e.g. 4.5" required>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-map-marked-alt"></i> Geographic & Temporal</h3>
+                <div class="grid-layout">
+                    <div class="input-group">
+                        <label for="altitude_m">Altitude (m)</label>
+                        <input type="number" step="any" id="altitude_m" name="altitude_m" placeholder="e.g. 150" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="distance_to_sea_km">Distance to Sea (km)</label>
+                        <input type="number" step="any" id="distance_to_sea_km" name="distance_to_sea_km" placeholder="e.g. 45.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="latitude_deg">Latitude (°)</label>
+                        <input type="number" step="any" id="latitude_deg" name="latitude_deg" placeholder="e.g. 23.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="sin_day">Sine of Day</label>
+                        <input type="number" step="any" id="sin_day" name="sin_day" placeholder="e.g. 0.86" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="cos_day">Cosine of Day</label>
+                        <input type="number" step="any" id="cos_day" name="cos_day" placeholder="e.g. -0.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="climate_zone">Climate Zone</label>
+                        <input type="number" step="any" id="climate_zone" name="climate_zone" placeholder="e.g. 1" required>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-history"></i> Historical Trends</h3>
+                <div class="grid-layout">
+                    <div class="input-group">
+                        <label for="rain_lag_1">Rain Lag 1</label>
+                        <input type="number" step="any" id="rain_lag_1" name="rain_lag_1" placeholder="e.g. 0.0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="rain_lag_3">Rain Lag 3</label>
+                        <input type="number" step="any" id="rain_lag_3" name="rain_lag_3" placeholder="e.g. 1.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="rain_lag_7">Rain Lag 7</label>
+                        <input type="number" step="any" id="rain_lag_7" name="rain_lag_7" placeholder="e.g. 5.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="soil_moisture_pct">Soil Moisture (%)</label>
+                        <input type="number" step="any" id="soil_moisture_pct" name="soil_moisture_pct" placeholder="e.g. 45.0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="rain_trend">Rain Trend</label>
+                        <input type="number" step="any" id="rain_trend" name="rain_trend" placeholder="e.g. 0.5" required>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-chart-line"></i> Advanced Indices</h3>
+                <div class="grid-layout">
+                    <div class="input-group">
+                        <label for="monsoon_index">Monsoon Index</label>
+                        <input type="number" step="any" id="monsoon_index" name="monsoon_index" placeholder="e.g. 0.8" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="el_nino_index">El Nino Index</label>
+                        <input type="number" step="any" id="el_nino_index" name="el_nino_index" placeholder="e.g. -0.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="heat_index">Heat Index</label>
+                        <input type="number" step="any" id="heat_index" name="heat_index" placeholder="e.g. 28.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="moisture_pressure">Moisture Pressure</label>
+                        <input type="number" step="any" id="moisture_pressure" name="moisture_pressure" placeholder="e.g. 15.2" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="wind_cloud_interaction">Wind-Cloud Int.</label>
+                        <input type="number" step="any" id="wind_cloud_interaction" name="wind_cloud_interaction" placeholder="e.g. 300.0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="climate_interaction">Climate Int.</label>
+                        <input type="number" step="any" id="climate_interaction" name="climate_interaction" placeholder="e.g. 1.5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="altitude_distance_ratio">Alt-Dist Ratio</label>
+                        <input type="number" step="any" id="altitude_distance_ratio" name="altitude_distance_ratio" placeholder="e.g. 3.3" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-predict" id="submit-btn">
+                    <span id="btn-text">Generate Forecast</span>
+                    <div class="loading-spinner" id="spinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <div class="result-section" id="result-card">
+            <i class="fas fa-satellite result-icon" id="outcome-icon"></i>
+            <h2 class="result-title" id="outcome-title">Awaiting Data</h2>
+            <div class="result-prob" id="outcome-prob">--%</div>
+            <p class="result-desc" id="outcome-desc">Enter the atmospheric conditions in the parameters panel and initialize the forecast generation to see the probability of rainfall.</p>
+        </div>
+    </div>
+    
+    <div class="toast" id="error-toast">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="toast-message">Error connecting to the model.</span>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('spinner');
+            const icon = document.getElementById('outcome-icon');
+            const title = document.getElementById('outcome-title');
+            const prob = document.getElementById('outcome-prob');
+            const desc = document.getElementById('outcome-desc');
+            const toast = document.getElementById('error-toast');
+            const toastMsg = document.getElementById('toast-message');
+
+            // Collect data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Loading state
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            // Reset animations
+            icon.className = 'fas fa-satellite result-icon';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                // Update UI based on prediction
+                const probabilityValue = (result.probability * 100).toFixed(1);
+                prob.textContent = `${probabilityValue}%`;
+
+                if (result.prediction === 1) {
+                    icon.className = 'fas fa-cloud-showers-heavy result-icon rain';
+                    title.textContent = 'Precipitation Likely';
+                    desc.textContent = 'Atmospheric conditions highly favor rainfall. Precautions are advised for outdoor activities.';
+                } else {
+                    icon.className = 'fas fa-sun result-icon sun';
+                    title.textContent = 'Clear Skies Expected';
+                    desc.textContent = 'Current parameters indicate stable atmospheric conditions with minimal chance of precipitation.';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                toastMsg.textContent = error.message || 'An error occurred during prediction.';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 5000);
+            } finally {
+                // Restore button
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Populate with dummy data for testing purposes (optional)
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Shift+F to fill dummy data
+            if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.value = (Math.random() * 50).toFixed(2);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
