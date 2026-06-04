@@ -14,14 +14,20 @@ FEATURES = [
 ]
 
 MODEL_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'rf_model.pkl'))
+model = None
+load_error = None
 
-try:
-    model = joblib.load(MODEL_PATH)
-except Exception as exc:
-    model = None
-    load_error = str(exc)
-else:
-    load_error = None
+
+def load_model():
+    global model, load_error
+    if model is not None or load_error is not None:
+        return
+
+    try:
+        model = joblib.load(MODEL_PATH)
+    except Exception as exc:
+        model = None
+        load_error = str(exc)
 
 
 def parse_body(request):
@@ -39,6 +45,7 @@ def parse_body(request):
 
 
 def handler(request):
+    load_model()
     if load_error:
         return {
             'statusCode': 500,
@@ -55,11 +62,7 @@ def handler(request):
         }
 
     try:
-        input_data = []
-        for feature in FEATURES:
-            value = data.get(feature, 0.0)
-            input_data.append(float(value or 0.0))
-
+        input_data = [float(data.get(feature, 0.0) or 0.0) for feature in FEATURES]
         input_array = np.array(input_data).reshape(1, -1)
         prediction = model.predict(input_array)
         probability = None
